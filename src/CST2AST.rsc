@@ -22,13 +22,16 @@ AForm cst2ast(start[Form] sf) {
 }
 
 AQuestion cst2ast(Question q) {
-  throw "Not yet implemented";
+  switch (q) {
+  	case (Question)`<Str x> <Id y>:<Type z>`: return single("<x>", "<y>", "<z>");
+	default: throw "unhandled expression: <q>";
+  }
 }
 
 AExpr cst2ast(Expr e) {
   switch (e) {
     case (Expr)`<Id x>`: return ref("<x>", src=x@\loc);
-    
+    case (Expr)`<Int x>`: return ref("<x>", src=x@\loc);
     // etc.
     
     default: throw "Unhandled expression: <e>";
@@ -36,5 +39,7 @@ AExpr cst2ast(Expr e) {
 }
 
 AType cst2ast(Type t) {
-  throw "Not yet implemented";
+  switch (t) {
+  	case (Type)``: return;
+  }
 }
