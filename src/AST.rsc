@@ -20,7 +20,8 @@ data AQuestion(loc src = |tmp:///|)
   ; 
 
 data AExpr(loc src = |tmp:///|)
-  = ref(str name)
+  = parentheses(AExpr)
+  | ref(str name)
   | integer(int variable)
   | boolean(bool boolean)
   | not(AExpr)
@@ -40,9 +41,3 @@ data AExpr(loc src = |tmp:///|)
 
 data AType(loc src = |tmp:///|)
  = datatype(str name);
-
-AForm form()
- = form("test", [
- 	 single("Did you buy a house in 2010?", "hasBoughtHouse", "boolean"),
- 	 computed("Did you enter a loan?", "hasMaintLoan", "boolean", not(boolean(true)))
-   ]);
