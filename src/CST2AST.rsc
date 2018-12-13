@@ -40,6 +40,7 @@ AExpr cst2ast(ex:Expr e) {
     case (Expr)`<Id x>`: return ref("<x>", src=ex@\loc);
     case (Expr)`<Int x>`: return integer(toInt("<x>"), src=ex@\loc);
     case (Expr)`<Bool x>`: return boolean(fromString("<x>"), src=ex@\loc);
+    case (Expr)`<Str x>`: return string("<x>", src=ex@\loc);
     case (Expr)`!<Expr e>`: return not(cst2ast(e), src=ex@\loc);
     case (Expr)`<Expr e1> * <Expr e2>`: return product(cst2ast(e1), cst2ast(e2), src=ex@\loc);
     case (Expr)`<Expr e1> / <Expr e2>`: return quotient(cst2ast(e1), cst2ast(e2), src=ex@\loc);
