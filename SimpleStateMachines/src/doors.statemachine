@@ -1,0 +1,14 @@
+
+machine Doors
+
+state closed
+  on open goto opened
+  on lock goto locked
+ 
+ 
+state opened
+  on close goto closed
+  
+state closed  
+  
+state bla
