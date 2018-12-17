@@ -40,4 +40,8 @@ data AExpr(loc src = |tmp:///|)
   ;
 
 data AType(loc src = |tmp:///|)
- = datatype(str name);
+  = tint()
+  | tbool()
+  | tstr()
+  | tunknown()
+  ;

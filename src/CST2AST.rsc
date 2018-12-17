@@ -58,4 +58,11 @@ AExpr cst2ast(ex:Expr e) {
   }
 }
 
-AType cst2ast(ty:(Type)`<Type t>`) = datatype("<t>", src=ty@\loc);
+AType cst2ast(ty:Type t) {
+  switch(t) {
+  	case (Type)`integer`: return tint();
+  	case (Type)`boolean`: return tbool();
+  	case (Type)`string`: return tstr();
+  	default: return tunknown();
+  }
+}
