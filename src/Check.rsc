@@ -3,6 +3,7 @@ module Check
 import AST;
 import Resolve;
 import Message; // see standard library
+import IO;
 
 data Type
   = tint()
@@ -22,16 +23,33 @@ TEnv collect(AForm f) {
   return tenv;  
 }
 
-set[Message] check(AForm f, TEnv tenv, UseDef useDef) {
-  return {}; 
-}
+set[Message] check(AForm f, TEnv tenv, UseDef useDef)
+  = ( {} | it + check(q, tenv, useDef) | AQuestion q  <- f.questions );
+
 
 // - produce an error if there are declared questions with the same name but different types.
 // - duplicate labels should trigger a warning 
 // - the declared type computed questions should match the type of the expression.
-set[Message] check(AQuestion q, TEnv tenv, UseDef useDef) {
-  return {}; 
+set[Message] check(AQuestion q, TEnv tenv, UseDef useDef){
+   println(q);
+
+  set[Message] msgs = {};  
+  for(/TEnv t := tenv) {
+  if (q has name){
+   if(tenv.name == q.name) {
+   println("hello");
+	if (q.datatype != Tenv.AType){
+	 msgs += { error("same name different type",q.src)};
+	} else {
+	 msgs += { warning("same name",q.src)};
+	}
+   }
+   }
+  }
+ 
+ return msgs;
 }
+
 
 // Check operand compatibility with operators.
 // E.g. for an addition node add(lhs, rhs), 

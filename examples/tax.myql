@@ -3,7 +3,7 @@ form taxOfficeExample {
     hasBoughtHouse: boolean
     
    "Did you buy a house in 2010?"
-    hasBoughtHouse: boolean 
+    hasBoughtHouse: integer
    
     // akjsdhakjshdkjsa
     
