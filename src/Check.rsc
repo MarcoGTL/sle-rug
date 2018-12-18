@@ -4,6 +4,7 @@ import AST;
 import Resolve;
 import Message; // see standard library
 import IO;
+import Set;
 
 data Type
   = tint()
@@ -19,37 +20,23 @@ alias TEnv = rel[loc def, str name, str label, AType \type];
 // To avoid recursively traversing the form, use the `visit` construct
 // or deep match (e.g., `for (/question(...) := f) {...}` ) 
 TEnv collect(AForm f) {
-  TEnv tenv = { <q.src, q.name, q.label, q.datatype> | AQuestion q <- f.questions, (q has name)};
+  TEnv tenv = { <q.src, q.name, q.label, q.datatype> | /AQuestion q <- f.questions, (q has name)};
   return tenv;  
 }
 
 set[Message] check(AForm f, TEnv tenv, UseDef useDef)
-  = ( {} | it + check(q, tenv, useDef) | AQuestion q  <- f.questions );
+  = ( {} | it + check(q, tenv, useDef) | /AQuestion q  <- f.questions );
 
 
 // - produce an error if there are declared questions with the same name but different types.
 // - duplicate labels should trigger a warning 
 // - the declared type computed questions should match the type of the expression.
 set[Message] check(AQuestion q, TEnv tenv, UseDef useDef){
-   println(q);
-
-  set[Message] msgs = {};  
-  for(/TEnv t := tenv) {
-  if (q has name){
-   if(tenv.name == q.name) {
-   println("hello");
-	if (q.datatype != Tenv.AType){
-	 msgs += { error("same name different type",q.src)};
-	} else {
-	 msgs += { warning("same name",q.src)};
-	}
-   }
-   }
-  }
- 
- return msgs;
+	
+	msgs = { error("Question has same name but different type", q.src) | (q has name), size(tenv[_,q.name,_]) > 1};
+	msgs += { warning("Same label", q.src) | (q has label), t := tenv<label,def>, size(t[q.label]) > 1 };
+	return msgs;
 }
-
 
 // Check operand compatibility with operators.
 // E.g. for an addition node add(lhs, rhs), 
