@@ -14,7 +14,7 @@ data Type
   ;
 
 // the type environment consisting of defined questions in the form 
-alias TEnv = rel[loc def, str name, str label, AType \type];
+alias TEnv = rel[loc def, str name, str label, Type \type];
 
 
 // To avoid recursively traversing the form, use the `visit` construct
@@ -22,6 +22,10 @@ alias TEnv = rel[loc def, str name, str label, AType \type];
 TEnv collect(AForm f) {
   TEnv tenv = { <q.src, q.name, q.label, q.datatype> | /AQuestion q <- f.questions, (q has name)};
   return tenv;  
+}
+
+Type toType(AType t) {
+  
 }
 
 set[Message] check(AForm f, TEnv tenv, UseDef useDef)
@@ -55,7 +59,7 @@ set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
     case plus(AExpr expr1, AExpr expr2):
     ;
     case minus(AExpr expr1, AExpr expr2, src = loc u):
-      msgs += { error("Trying to subract non-integers", u) | (typeOf(expr1, tenv, useDef) != typeOf(expr2, tenv, useDef))};
+      msgs += { error("Trying to subract non-integers", u) | (typeOf(expr1, tenv, useDef) != tint())};
 
     case less(AExpr expr1, AExpr expr2):
     ;
