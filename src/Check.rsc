@@ -32,9 +32,9 @@ set[Message] check(AForm f, TEnv tenv, UseDef useDef)
 // - duplicate labels should trigger a warning 
 // - the declared type computed questions should match the type of the expression.
 set[Message] check(AQuestion q, TEnv tenv, UseDef useDef)
-  = { error("Question has same name but different type", q.src) | (q has name), size(tenv[_,q.name,_]) > 1}
-  + { warning("Same label", q.src) | (q has label), t := tenv<label,def>, size(t[q.label]) > 1 }
-  + { error("Declared type does not match expression type", q.src) | (q has expr), (q.expr is plus || q.expr is minus)}
+  = { error("Question has same name but different type.", q.src) | (q has name), size(tenv[_,q.name,_]) > 1}
+  + { warning("Duplicate label encountered.", q.src) | (q has label), t := tenv<label,def>, size(t[q.label]) > 1 }
+  + { error("Declared type does not match expression type.", q.src) | (q is computed), q.datatype != typeOf(q.expr,tenv,useDef)}
   + ( {} | it +  check(e, tenv, useDef) | (q has expr), /AExpr e <- q);
 
 // Check operand compatibility with operators.
@@ -47,7 +47,7 @@ set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
     case ref(str x, src = loc u):
       msgs += { error("Undeclared question", u) | useDef[u] == {} };
 	case not(AExpr expr, src = loc u):
-	  msgs += { error("Expression is not a boolean", u) | typeof(expr, tenv, useDef) != tbool()};
+	  msgs += { error("Expression is not a boolean", u) | typeOf(expr, tenv, useDef) != tbool()};
     case product(AExpr expr1, AExpr expr2):
     ;
     case quotient(AExpr expr1, AExpr expr2):
@@ -55,7 +55,8 @@ set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
     case plus(AExpr expr1, AExpr expr2):
     ;
     case minus(AExpr expr1, AExpr expr2, src = loc u):
-      msgs += { error("", u)};
+      msgs += { error("Trying to subract non-integers", u) | (typeOf(expr1, tenv, useDef) != typeOf(expr2, tenv, useDef))};
+
     case less(AExpr expr1, AExpr expr2):
     ;
     case lesseq(AExpr expr1, AExpr expr2):
