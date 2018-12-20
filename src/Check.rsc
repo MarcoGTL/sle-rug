@@ -31,12 +31,11 @@ set[Message] check(AForm f, TEnv tenv, UseDef useDef)
 // - produce an error if there are declared questions with the same name but different types.
 // - duplicate labels should trigger a warning 
 // - the declared type computed questions should match the type of the expression.
-set[Message] check(AQuestion q, TEnv tenv, UseDef useDef){
-	
-	msgs = { error("Question has same name but different type", q.src) | (q has name), size(tenv[_,q.name,_]) > 1};
-	msgs += { warning("Same label", q.src) | (q has label), t := tenv<label,def>, size(t[q.label]) > 1 };
-	return msgs;
-}
+set[Message] check(AQuestion q, TEnv tenv, UseDef useDef)
+	= { error("Question has same name but different type", q.src) | (q has name), size(tenv[_,q.name,_]) > 1}
+    + { warning("Same label", q.src) | (q has label), t := tenv<label,def>, size(t[q.label]) > 1 }
+    + ( {} | it + check(t, r) | q has AExpr, AExpr e <- q.Expr );
+
 
 // Check operand compatibility with operators.
 // E.g. for an addition node add(lhs, rhs), 
