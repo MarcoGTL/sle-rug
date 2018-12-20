@@ -32,22 +32,46 @@ set[Message] check(AForm f, TEnv tenv, UseDef useDef)
 // - duplicate labels should trigger a warning 
 // - the declared type computed questions should match the type of the expression.
 set[Message] check(AQuestion q, TEnv tenv, UseDef useDef)
-	= { error("Question has same name but different type", q.src) | (q has name), size(tenv[_,q.name,_]) > 1}
-    + { warning("Same label", q.src) | (q has label), t := tenv<label,def>, size(t[q.label]) > 1 }
-    + ( {} | it + check(t, r) | q has AExpr, AExpr e <- q.Expr );
-
+  = { error("Question has same name but different type", q.src) | (q has name), size(tenv[_,q.name,_]) > 1}
+  + { warning("Same label", q.src) | (q has label), t := tenv<label,def>, size(t[q.label]) > 1 }
+  + { error("Declared type does not match expression type", q.src) | (q has expr), (q.expr is plus || q.expr is minus)}
+  + ( {} | it +  check(e, tenv, useDef) | (q has expr), /AExpr e <- q);
 
 // Check operand compatibility with operators.
 // E.g. for an addition node add(lhs, rhs), 
 //   the requirement is that typeOf(lhs) == typeOf(rhs) == tint()
 set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
   set[Message] msgs = {};
-  
+
   switch (e) {
     case ref(str x, src = loc u):
       msgs += { error("Undeclared question", u) | useDef[u] == {} };
-
-    // etc.
+	case not(AExpr expr, src = loc u):
+	  msgs += { error("Expression is not a boolean", u) | typeof(expr, tenv, useDef) != tbool()};
+    case product(AExpr expr1, AExpr expr2):
+    ;
+    case quotient(AExpr expr1, AExpr expr2):
+    ;
+    case plus(AExpr expr1, AExpr expr2):
+    ;
+    case minus(AExpr expr1, AExpr expr2, src = loc u):
+      msgs += { error("", u)};
+    case less(AExpr expr1, AExpr expr2):
+    ;
+    case lesseq(AExpr expr1, AExpr expr2):
+    ;
+    case greater(AExpr expr1, AExpr expr2):
+    ;
+    case greatereq(AExpr expr1, AExpr expr2):
+    ;
+    case equals(AExpr expr1, AExpr expr2):
+    ;
+    case notequals(AExpr expr1, AExpr expr2):
+    ;
+    case and(AExpr expr1, AExpr expr2):
+    ;
+    case or(AExpr expr1, AExpr expr2):
+    ;
   }
   
   return msgs; 
@@ -59,7 +83,21 @@ Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
       if (<u, loc d> <- useDef, <d, x, _, Type t> <- tenv) {
         return t;
       }
-    // etc.
+    case integer(int x): return tint();
+    case boolean(bool boolean): return tbool();
+    case not(AExpr expr): return tbool();
+    case product(AExpr expr1, AExpr expr2): return tint();
+    case quotient(AExpr expr1, AExpr expr2): return tint();
+    case plus(AExpr expr1, AExpr expr2): return tint();
+    case minus(AExpr expr1, AExpr expr2): return tint();
+    case less(AExpr expr1, AExpr expr2): return tbool();
+    case lesseq(AExpr expr1, AExpr expr2): return tbool();
+    case greater(AExpr expr1, AExpr expr2): return tbool();
+    case greatereq(AExpr expr1, AExpr expr2): return tbool();
+    case equals(AExpr expr1, AExpr expr2): return tbool();
+    case notequals(AExpr expr1, AExpr expr2): return tbool();
+    case and(AExpr expr1, AExpr expr2): return tbool();
+    case or(AExpr expr1, AExpr expr2): return tbool();
   }
   return tunknown(); 
 }
@@ -75,6 +113,19 @@ Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
  * default Type typeOf(AExpr _, TEnv _, UseDef _) = tunknown();
  *
  */
+ 
+ set[Message] thing(AForm f) {
+  for (/AQuestion q <- f.questions, (q has name)) {
+     if (q has expr) {
+       println(q.expr);
+       for (/AExpr e <- q.expr) {
+  	     println(e);
+  	   }
+     }
+     
+  }
+  return {};
+}
  
  
 
