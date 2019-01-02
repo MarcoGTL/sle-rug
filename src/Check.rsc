@@ -4,6 +4,7 @@ import AST;
 import Resolve;
 import Message; // see standard library
 import IO;
+import Set;
 
 data Type
   = tint()
@@ -15,40 +16,53 @@ data Type
 // the type environment consisting of defined questions in the form 
 alias TEnv = rel[loc def, str name, str label, AType \type];
 
-
 // To avoid recursively traversing the form, use the `visit` construct
 // or deep match (e.g., `for (/question(...) := f) {...}` ) 
 TEnv collect(AForm f) {
-  TEnv tenv = { <q.src, q.name, q.label, q.datatype> | AQuestion q <- f.questions, (q has name)};
+  TEnv tenv = { <q.src, q.name, q.label, q.datatype> | /AQuestion q := f, (q has name)};
   return tenv;  
 }
 
 set[Message] check(AForm f, TEnv tenv, UseDef useDef)
-  = ( {} | it + check(q, tenv, useDef) | AQuestion q  <- f.questions );
+  = ( {} | it + check(q, tenv, useDef) | /AQuestion q  := f);
 
 
 // - produce an error if there are declared questions with the same name but different types.
 // - duplicate labels should trigger a warning 
 // - the declared type computed questions should match the type of the expression.
-set[Message] check(AQuestion q, TEnv tenv, UseDef useDef){
-   println(q);
+set[Message] check(AQuestion q, TEnv tenv, UseDef useDef) 
+  = { error("Same name with different type", q.src) | (q has name), size(tenv<name,def,label,\type>[q.name]) > 1}
+  + { warning("Same label is used multiple times", q.src) | (q has label), size(tenv<label,def,name,\type>[q.label]) > 1};
+  
 
+/*println(tenv);
+  
   set[Message] msgs = {};  
-  for(/TEnv t := tenv) {
-  if (q has name){
-   if(tenv.name == q.name) {
-   println("hello");
-	if (q.datatype != Tenv.AType){
-	 msgs += { error("same name different type",q.src)};
-	} else {
-	 msgs += { warning("same name",q.src)};
-	}
-   }
-   }
+  for (Rel r <- tenv) {
+    
   }
- 
+
+if (q has name && size(tenv[_,_,q.name]) > 1) {
+    msgs += { error("same name different type",q.src)};
+  }
+  if (q has label && size(tenv[_,q.label]) > 1) {
+  	msgs += { warning("same name",q.src)};
+  }
+
+if (name == q.name) {
+  	  if (q.datatype != q2.datatype) {
+  	    msgs += { error("same name different type",q.src)};
+  	  } else {
+   	    msgs += { warning("same name",q.src)};
+  	  }
+  	}
+  	
+  	 println(msgs);
+ println("\n");
  return msgs;
 }
+*/ 
+
 
 
 // Check operand compatibility with operators.
