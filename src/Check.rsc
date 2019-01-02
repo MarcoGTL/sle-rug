@@ -16,16 +16,11 @@ data Type
 // the type environment consisting of defined questions in the form 
 alias TEnv = rel[loc def, str name, str label, Type \type];
 
-
 // To avoid recursively traversing the form, use the `visit` construct
 // or deep match (e.g., `for (/question(...) := f) {...}` ) 
 TEnv collect(AForm f) {
   TEnv tenv = { <q.src, q.name, q.label, q.datatype> | /AQuestion q <- f.questions, (q has name)};
   return tenv;  
-}
-
-Type toType(AType t) {
-  
 }
 
 set[Message] check(AForm f, TEnv tenv, UseDef useDef)
@@ -46,39 +41,46 @@ set[Message] check(AQuestion q, TEnv tenv, UseDef useDef)
 //   the requirement is that typeOf(lhs) == typeOf(rhs) == tint()
 set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
   set[Message] msgs = {};
-
   switch (e) {
     case ref(str x, src = loc u):
       msgs += { error("Undeclared question", u) | useDef[u] == {} };
 	case not(AExpr expr, src = loc u):
-	  msgs += { error("Expression is not a boolean", u) | typeOf(expr, tenv, useDef) != tbool()};
+	  msgs += { error("Expression in negation is not a boolean", u) | typeOf(expr, tenv, useDef) != tbool()};
     case product(AExpr expr1, AExpr expr2):
-    ;
+      msgs += {error("First expression in multiplication is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
+            + {error("Second expression in multiplication is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
     case quotient(AExpr expr1, AExpr expr2):
-    ;
+      msgs += {error("First expression in division is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
+            + {error("Second expression in division is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
     case plus(AExpr expr1, AExpr expr2):
-    ;
+      msgs += {error("First expression in addition is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
+            + {error("Second expression in addition is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
     case minus(AExpr expr1, AExpr expr2, src = loc u):
-      msgs += { error("Trying to subract non-integers", u) | (typeOf(expr1, tenv, useDef) != tint())};
-
+      msgs += {error("First expression in subtraction is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
+            + {error("Second expression in subtraction is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
     case less(AExpr expr1, AExpr expr2):
-    ;
+      msgs += {error("First expression in comparison is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
+            + {error("Second expression in comparison is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
     case lesseq(AExpr expr1, AExpr expr2):
-    ;
+      msgs += {error("First expression in comparison is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
+            + {error("Second expression in comparison is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
     case greater(AExpr expr1, AExpr expr2):
-    ;
+      msgs += {error("First expression in comparison is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
+            + {error("Second expression in comparison is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
     case greatereq(AExpr expr1, AExpr expr2):
-    ;
+      msgs += {error("First expression in comparison is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
+            + {error("Second expression in comparison is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
     case equals(AExpr expr1, AExpr expr2):
-    ;
+      msgs += {error("Comparing expressions of different types", u) | (typeOf(expr1, tenv, useDef) != typeOf(expr2, tenv, useDef))};
     case notequals(AExpr expr1, AExpr expr2):
-    ;
+      msgs += {error("Comparing expressions of different types", u) | (typeOf(expr1, tenv, useDef) != typeOf(expr2, tenv, useDef))};
     case and(AExpr expr1, AExpr expr2):
-    ;
+      msgs += {error("First expression in and operation is not a boolean", u) | (typeOf(expr1, tenv, useDef) != tbool())}
+            + {error("Second expression in and operation is not a boolean", u) | (typeOf(expr2, tenv, useDef) != tbool())};
     case or(AExpr expr1, AExpr expr2):
-    ;
+      msgs += {error("First expression in or operation is not a boolean", u) | (typeOf(expr1, tenv, useDef) != tbool())}
+            + {error("Second expression in or operation is not a boolean", u) | (typeOf(expr2, tenv, useDef) != tbool())};
   }
-  
   return msgs; 
 }
 
@@ -118,18 +120,5 @@ Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
  * default Type typeOf(AExpr _, TEnv _, UseDef _) = tunknown();
  *
  */
- 
- set[Message] thing(AForm f) {
-  for (/AQuestion q <- f.questions, (q has name)) {
-     if (q has expr) {
-       println(q.expr);
-       for (/AExpr e <- q.expr) {
-  	     println(e);
-  	   }
-     }
-     
-  }
-  return {};
-}
  
  
