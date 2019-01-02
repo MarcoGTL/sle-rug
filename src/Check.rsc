@@ -19,13 +19,21 @@ alias TEnv = rel[loc def, str name, str label, Type \type];
 // To avoid recursively traversing the form, use the `visit` construct
 // or deep match (e.g., `for (/question(...) := f) {...}` ) 
 TEnv collect(AForm f) {
-  TEnv tenv = { <q.src, q.name, q.label, q.datatype> | /AQuestion q <- f.questions, (q has name)};
+  TEnv tenv = { <q.src, q.name, q.label, toType(q.datatype)> | /AQuestion q <- f.questions, (q has name)};
   return tenv;  
+}
+
+Type toType(AType t) {
+  switch(t) {
+    case tint(): return tint();
+    case tbool(): return tbool();
+  	case tstr(): return tstr();
+  	default: return tunknown();
+  }
 }
 
 set[Message] check(AForm f, TEnv tenv, UseDef useDef)
   = ( {} | it + check(q, tenv, useDef) | /AQuestion q  <- f.questions );
-
 
 // - produce an error if there are declared questions with the same name but different types.
 // - duplicate labels should trigger a warning 
@@ -33,7 +41,7 @@ set[Message] check(AForm f, TEnv tenv, UseDef useDef)
 set[Message] check(AQuestion q, TEnv tenv, UseDef useDef)
   = { error("Question has same name but different type.", q.src) | (q has name), size(tenv[_,q.name,_]) > 1}
   + { warning("Duplicate label encountered.", q.src) | (q has label), t := tenv<label,def>, size(t[q.label]) > 1 }
-  + { error("Declared type does not match expression type.", q.src) | (q is computed), q.datatype != typeOf(q.expr,tenv,useDef)}
+  + { error("Declared type does not match expression type.", q.src) | (q is computed), (toType(q.datatype) != typeOf(q.expr,tenv,useDef))}
   + ( {} | it +  check(e, tenv, useDef) | (q has expr), /AExpr e <- q);
 
 // Check operand compatibility with operators.
@@ -105,6 +113,7 @@ Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
     case notequals(AExpr expr1, AExpr expr2): return tbool();
     case and(AExpr expr1, AExpr expr2): return tbool();
     case or(AExpr expr1, AExpr expr2): return tbool();
+    default: return tunknown();
   }
   return tunknown(); 
 }
