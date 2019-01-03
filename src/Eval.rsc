@@ -16,6 +16,15 @@ data Value
   | vbool(bool b)
   | vstr(str s)
   ;
+  
+Value toValue(AType t){
+ switch(t) {
+    case tint(): return vint();
+    case tbool(): return vbool();
+  	case tstr(): return vstr();
+  	default: return;
+  }
+ }
 
 // The value environment
 alias VEnv = map[str name, Value \value];
@@ -27,7 +36,10 @@ data Input
 // produce an environment which for each question has a default value
 // (e.g. 0 for int, "" for str etc.)
 VEnv initialEnv(AForm f) {
-  return ();
+ VEnv venv = ( q.name : vint(0)  | /AQuestion q <- f.questions, (q has datatype), (q.datatype ==  tint()));
+ venv += ( q.name : vbool(false)  | /AQuestion q <- f.questions, (q has datatype), (q.datatype ==  tbool()));
+ venv += ( q.name : vstr("")  | /AQuestion q <- f.questions, (q has datatype), (q.datatype ==  tstr()));
+  return venv;
 }
 
 
