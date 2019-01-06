@@ -42,7 +42,7 @@ set[Message] check(AQuestion q, TEnv tenv, UseDef useDef)
   = { error("Question has same name but different type.", q.src) | (q has name), size(tenv[_,q.name,_]) > 1}
   + { warning("Duplicate label encountered.", q.src) | (q has label), t := tenv<label,def>, size(t[q.label]) > 1 }
   + { error("Declared type does not match expression type.", q.src) | (q is computed), toType(q.datatype) != typeOf(q.expr,tenv,useDef)}
-  + { error("Expression in if statement is not a boolean", q.src) | (q is ifthen || q is ifthenelse), typeOf(q.expr,tenv,useDef != tbool())}
+  + { error("Expression in if statement is not a boolean", q.expr.src) | (q is ifthen || q is ifthenelse), typeOf(q.expr,tenv,useDef) != tbool()}
   + ( {} | it +  check(e, tenv, useDef) | (q has expr), /AExpr e <- q);
 
 // Check operand compatibility with operators.
@@ -55,38 +55,38 @@ set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
       msgs += { error("Undeclared question", u) | useDef[u] == {} };
 	case not(AExpr expr, src = loc u):
 	  msgs += { error("Expression in negation is not a boolean", u) | typeOf(expr, tenv, useDef) != tbool()};
-    case product(AExpr expr1, AExpr expr2):
+    case product(AExpr expr1, AExpr expr2, src = loc u):
       msgs += {error("First expression in multiplication is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
             + {error("Second expression in multiplication is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
-    case quotient(AExpr expr1, AExpr expr2):
+    case quotient(AExpr expr1, AExpr expr2, src = loc u):
       msgs += {error("First expression in division is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
             + {error("Second expression in division is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
-    case plus(AExpr expr1, AExpr expr2):
+    case plus(AExpr expr1, AExpr expr2, src = loc u):
       msgs += {error("First expression in addition is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
             + {error("Second expression in addition is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
     case minus(AExpr expr1, AExpr expr2, src = loc u):
       msgs += {error("First expression in subtraction is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
             + {error("Second expression in subtraction is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
-    case less(AExpr expr1, AExpr expr2):
+    case less(AExpr expr1, AExpr expr2, src = loc u):
       msgs += {error("First expression in comparison is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
             + {error("Second expression in comparison is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
-    case lesseq(AExpr expr1, AExpr expr2):
+    case lesseq(AExpr expr1, AExpr expr2, src = loc u):
       msgs += {error("First expression in comparison is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
             + {error("Second expression in comparison is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
-    case greater(AExpr expr1, AExpr expr2):
+    case greater(AExpr expr1, AExpr expr2, src = loc u):
       msgs += {error("First expression in comparison is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
             + {error("Second expression in comparison is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
-    case greatereq(AExpr expr1, AExpr expr2):
+    case greatereq(AExpr expr1, AExpr expr2, src = loc u):
       msgs += {error("First expression in comparison is not an integer", u) | (typeOf(expr1, tenv, useDef) != tint())}
             + {error("Second expression in comparison is not an integer", u) | (typeOf(expr2, tenv, useDef) != tint())};
-    case equals(AExpr expr1, AExpr expr2):
+    case equals(AExpr expr1, AExpr expr2, src = loc u):
       msgs += {error("Comparing expressions of different types", u) | (typeOf(expr1, tenv, useDef) != typeOf(expr2, tenv, useDef))};
-    case notequals(AExpr expr1, AExpr expr2):
+    case notequals(AExpr expr1, AExpr expr2, src = loc u):
       msgs += {error("Comparing expressions of different types", u) | (typeOf(expr1, tenv, useDef) != typeOf(expr2, tenv, useDef))};
-    case and(AExpr expr1, AExpr expr2):
+    case and(AExpr expr1, AExpr expr2, src = loc u):
       msgs += {error("First expression in and operation is not a boolean", u) | (typeOf(expr1, tenv, useDef) != tbool())}
             + {error("Second expression in and operation is not a boolean", u) | (typeOf(expr2, tenv, useDef) != tbool())};
-    case or(AExpr expr1, AExpr expr2):
+    case or(AExpr expr1, AExpr expr2, src = loc u):
       msgs += {error("First expression in or operation is not a boolean", u) | (typeOf(expr1, tenv, useDef) != tbool())}
             + {error("Second expression in or operation is not a boolean", u) | (typeOf(expr2, tenv, useDef) != tbool())};
   }

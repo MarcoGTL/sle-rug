@@ -1,12 +1,12 @@
 form taxOfficeExample { 
   "Did you buy a house in 2010?"
-    hasBoughtHouse: boolean 
+    hasBoughtHouse1: boolean = true 
     
-   "Did you buy a house in 2010?"
-    hasBoughtHouse: boolean
+   "Did you buy a house in 2011?"
+    hasBoughtHouse2: boolean = true
     
    "Did you buy a house in 20XX?"
-    test: boolean   
+    test2: boolean   
 
     "Did you buy a house in 20XX?"
     test: integer
@@ -17,9 +17,9 @@ form taxOfficeExample {
     hasMaintLoan: boolean
     
   "Did you sell a house in 2010?"
-    hasSoldHouse: boolean
+    hasSoldHouse: boolean = true
    
-  if (test3) {
+  if (test2) {
     "What was the selling price?"
       sellingPrice: integer
     "Private debts for the sold house:"
@@ -27,7 +27,7 @@ form taxOfficeExample {
     "Value residue:"
       valueResidue: integer = sellingPrice - privateDebt
     "Test2:"
-      test2: boolean = hasSoldHouse == test
+      test2: boolean = hasSoldHouse == test2
     "Test3:"
       test3: string = "hello"
   }

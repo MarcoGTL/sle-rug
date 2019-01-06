@@ -43,16 +43,30 @@ VEnv eval(AForm f, Input inp, VEnv venv) {
 }
 
 VEnv evalOnce(AForm f, Input inp, VEnv venv) {
-  return (); 
+  for (AQuestion q <- f.questions) {
+    venv += eval(q, inp, venv);
+  }
+  return venv;
 }
 
 VEnv eval(AQuestion q, Input inp, VEnv venv) {
-  // evaluate conditions for branching,
-  // evaluate inp and computed questions to return updated VEnv
+  // evaluate conditions for branching 
+  if (q is ifthen || q is ifthenelse) {
+    if (eval(q.expr, venv) == vbool(true)) {
+      for (AQuestion qe <- q.questions) {
+        venv += eval(qe, inp, venv);
+      }
+    }
+  }
+  // evaluate input and computed questions to return updated VEnv
+  if (q is single && inp.question == q.name) {
+    venv[inp.question] = inp.\value;
+  }
+  if (q is computed) {
+    venv[q.name] = eval(q.expr, venv);
+  }
   return venv; 
 }
-
-
 
 Value eval(AExpr e, VEnv venv) {
   switch (e) {
@@ -63,71 +77,71 @@ Value eval(AExpr e, VEnv venv) {
     case not(AExpr expr): 
       switch(eval(expr, venv)) {
     	case vbool(x): return vbool(!x);
-    	default: throw "Cannot negate <expr>";
+    	default: throw "Cannot negate <expr.name>: <eval(expr, venv)>";
       }
     case product(AExpr expr1, AExpr expr2):
 	  switch([eval(expr1, venv), eval(expr2, venv)]) {
 	    case [vint(x), vint(y)]: return vint(x * y);
-	    default: throw "Cannot multiply <expr1> by <expr2>";
+	    default: throw "Cannot multiply <expr1.name>: <eval(expr1, venv)> by <expr2.name>: <eval(expr2,venv)>";
 	  }
     case quotient(AExpr expr1, AExpr expr2):
       switch([eval(expr1, venv), eval(expr2, venv)]) {
 	    case [vint(x), vint(y)]: return vint(x / y);
-	    default: throw "Cannot divide <expr1> by <expr2>";
+	    default: throw "Cannot divide <expr1.name>: <eval(expr1, venv)> by <expr2.name>: <eval(expr2,venv)>";
 	  }
     case plus(AExpr expr1, AExpr expr2):
       switch([eval(expr1, venv), eval(expr2, venv)]) {
 	    case [vint(x), vint(y)]: return vint(x + y);
-	    default: throw "Cannot add <expr1> to <expr2>";
+	    default: throw "Cannot add <expr1.name>: <eval(expr1, venv)> to <expr2.name>: <eval(expr2,venv)>";
 	  }
     case minus(AExpr expr1, AExpr expr2):
       switch([eval(expr1, venv), eval(expr2, venv)]) {
 	    case [vint(x), vint(y)]: return vint(x - y);
-	    default: throw "Cannot subtract <expr1> from <expr2>";
+	    default: throw "Cannot compare <expr1.name>: <eval(expr1, venv)> with <expr2.name>: <eval(expr2,venv)>";
 	  }
     case less(AExpr expr1, AExpr expr2):
       switch([eval(expr1, venv), eval(expr2, venv)]) {
 	    case [vint(x), vint(y)]: return vbool(x < y);
-	    default: throw "Cannot compare <expr1> with <expr2>";
+	    default: throw "Cannot compare <expr1.name>: <eval(expr1, venv)> with <expr2.name>: <eval(expr2,venv)>";
 	  }
     case lesseq(AExpr expr1, AExpr expr2):
       switch([eval(expr1, venv), eval(expr2, venv)]) {
 	    case [vint(x), vint(y)]: return vbool(x <= y);
-	    default: throw "Cannot compare <expr1> with <expr2>";
+	    default: throw "Cannot compare <expr1.name>: <eval(expr1, venv)> with <expr2.name>: <eval(expr2,venv)>";
 	  }
     case greater(AExpr expr1, AExpr expr2):
       switch([eval(expr1, venv), eval(expr2, venv)]) {
 	    case [vint(x), vint(y)]: return vbool(x > y);
-	    default: throw "Cannot compare <expr1> with <expr2>";
+	    default: throw "Cannot compare <expr1.name>: <eval(expr1, venv)> with <expr2.name>: <eval(expr2,venv)>";
 	  }
     case greatereq(AExpr expr1, AExpr expr2):
       switch([eval(expr1, venv), eval(expr2, venv)]) {
 	    case [vint(x), vint(y)]: return vbool(x >= y);
-	    default: throw "Cannot compare <expr1> with <expr2>";
+	    default: throw "Cannot compare <expr1.name>: <eval(expr1, venv)> with <expr2.name>: <eval(expr2,venv)>";
 	  }
     case equals(AExpr expr1, AExpr expr2):
       switch([eval(expr1, venv), eval(expr2, venv)]) {
 	    case [vint(x), vint(y)]: return vbool(x == y);
 	    case [vbool(x), vbool(y)]: return vbool(x == y);
 	    case [vstr(x), vstr(y)]: return vbool(x == y);
-	    default: throw "Cannot compare <expr1> with <expr2>";
+	    default: throw "Cannot compare <expr1.name>: <eval(expr1, venv)> with <expr2.name>: <eval(expr2,venv)>";
 	  }
     case notequals(AExpr expr1, AExpr expr2):
       switch([eval(expr1, venv), eval(expr2, venv)]) {
 	    case [vint(x), vint(y)]: return vbool(x != y);
 	    case [vbool(x), vbool(y)]: return vbool(x != y);
 	    case [vstr(x), vstr(y)]: return vbool(x != y);
-	    default: throw "Cannot compare <expr1> with <expr2>";
+	    default: throw "Cannot compare <expr1.name>: <eval(expr1, venv)> with <expr2.name>: <eval(expr2,venv)>";
 	  }
     case and(AExpr expr1, AExpr expr2):
       switch([eval(expr1, venv), eval(expr2, venv)]) {
 	    case [vbool(x), vbool(y)]: return vbool(x && y);
-	    default: throw "Cannot compare <expr1> with <expr2>";
+	    default: throw "Cannot compare <expr1.name>: <eval(expr1, venv)> with <expr2.name>: <eval(expr2,venv)>";
 	  }
     case or(AExpr expr1, AExpr expr2):
       switch([eval(expr1, venv), eval(expr2, venv)]) {
 	    case [vbool(x), vbool(y)]: return vbool(x || y);
-	    default: throw "Cannot compare <expr1> with <expr2>";
+	    default: throw "Cannot compare <expr1.name>: <eval(expr1, venv)> with <expr2.name>: <eval(expr2,venv)>";
 	  }
     
     default: throw "Unsupported expression <e>";
