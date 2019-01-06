@@ -16,15 +16,6 @@ data Value
   | vbool(bool b)
   | vstr(str s)
   ;
-  
-Value toValue(AType t){
- switch(t) {
-    case tint(): return vint();
-    case tbool(): return vbool();
-  	case tstr(): return vstr();
-  	default: return;
-  }
- }
 
 // The value environment
 alias VEnv = map[str name, Value \value];
@@ -61,11 +52,83 @@ VEnv eval(AQuestion q, Input inp, VEnv venv) {
   return (); 
 }
 
+
+
 Value eval(AExpr e, VEnv venv) {
   switch (e) {
     case ref(str x): return venv[x];
-    
-    // etc.
+    case integer(int x): return vint(x);
+    case boolean(bool boolean): return vbool(boolean);
+    case string(str string): return vstr(string);
+    case not(AExpr expr): 
+      switch(eval(expr, venv)) {
+    	case vbool(x): return vbool(!x);
+    	default: throw "Cannot negate <expr>";
+      }
+    case product(AExpr expr1, AExpr expr2):
+	  switch([eval(expr1, venv), eval(expr2, venv)]) {
+	    case [vint(x), vint(y)]: return vint(x * y);
+	    default: throw "Cannot multiply <expr1> by <expr2>";
+	  }
+    case quotient(AExpr expr1, AExpr expr2):
+      switch([eval(expr1, venv), eval(expr2, venv)]) {
+	    case [vint(x), vint(y)]: return vint(x / y);
+	    default: throw "Cannot divide <expr1> by <expr2>";
+	  }
+    case plus(AExpr expr1, AExpr expr2):
+      switch([eval(expr1, venv), eval(expr2, venv)]) {
+	    case [vint(x), vint(y)]: return vint(x + y);
+	    default: throw "Cannot add <expr1> to <expr2>";
+	  }
+    case minus(AExpr expr1, AExpr expr2):
+      switch([eval(expr1, venv), eval(expr2, venv)]) {
+	    case [vint(x), vint(y)]: return vint(x - y);
+	    default: throw "Cannot subtract <expr1> from <expr2>";
+	  }
+    case less(AExpr expr1, AExpr expr2):
+      switch([eval(expr1, venv), eval(expr2, venv)]) {
+	    case [vint(x), vint(y)]: return vbool(x < y);
+	    default: throw "Cannot compare <expr1> with <expr2>";
+	  }
+    case lesseq(AExpr expr1, AExpr expr2):
+      switch([eval(expr1, venv), eval(expr2, venv)]) {
+	    case [vint(x), vint(y)]: return vbool(x <= y);
+	    default: throw "Cannot compare <expr1> with <expr2>";
+	  }
+    case greater(AExpr expr1, AExpr expr2):
+      switch([eval(expr1, venv), eval(expr2, venv)]) {
+	    case [vint(x), vint(y)]: return vbool(x > y);
+	    default: throw "Cannot compare <expr1> with <expr2>";
+	  }
+    case greatereq(AExpr expr1, AExpr expr2):
+      switch([eval(expr1, venv), eval(expr2, venv)]) {
+	    case [vint(x), vint(y)]: return vbool(x >= y);
+	    default: throw "Cannot compare <expr1> with <expr2>";
+	  }
+    case equals(AExpr expr1, AExpr expr2):
+      switch([eval(expr1, venv), eval(expr2, venv)]) {
+	    case [vint(x), vint(y)]: return vbool(x == y);
+	    case [vbool(x), vbool(y)]: return vbool(x == y);
+	    case [vstr(x), vstr(y)]: return vbool(x == y);
+	    default: throw "Cannot compare <expr1> with <expr2>";
+	  }
+    case notequals(AExpr expr1, AExpr expr2):
+      switch([eval(expr1, venv), eval(expr2, venv)]) {
+	    case [vint(x), vint(y)]: return vbool(x != y);
+	    case [vbool(x), vbool(y)]: return vbool(x != y);
+	    case [vstr(x), vstr(y)]: return vbool(x != y);
+	    default: throw "Cannot compare <expr1> with <expr2>";
+	  }
+    case and(AExpr expr1, AExpr expr2):
+      switch([eval(expr1, venv), eval(expr2, venv)]) {
+	    case [vbool(x), vbool(y)]: return vbool(x && y);
+	    default: throw "Cannot compare <expr1> with <expr2>";
+	  }
+    case or(AExpr expr1, AExpr expr2):
+      switch([eval(expr1, venv), eval(expr2, venv)]) {
+	    case [vbool(x), vbool(y)]: return vbool(x || y);
+	    default: throw "Cannot compare <expr1> with <expr2>";
+	  }
     
     default: throw "Unsupported expression <e>";
   }

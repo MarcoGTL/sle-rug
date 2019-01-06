@@ -1,15 +1,15 @@
 form taxOfficeExample { 
   "Did you buy a house in 2010?"
-    hasBoughtHouse: boolean
+    hasBoughtHouse: boolean 
     
    "Did you buy a house in 2010?"
     hasBoughtHouse: boolean
     
-    
    "Did you buy a house in 20XX?"
-    test: boolean
-    
-    
+    test: boolean   
+
+    "Did you buy a house in 20XX?"
+    test: integer
    
     // akjsdhakjshdkjsa
     
@@ -25,8 +25,10 @@ form taxOfficeExample {
     "Private debts for the sold house:"
       privateDebt: integer
     "Value residue:"
-      valueResidue: boolean = sellingPrice - privateDebt
+      valueResidue: integer = sellingPrice - privateDebt
     "Test2:"
       test2: boolean = hasSoldHouse == test
+    "Test3:"
+      test3: string = "hello"
   }
 }

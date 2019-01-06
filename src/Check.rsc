@@ -100,6 +100,7 @@ Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
       }
     case integer(int x): return tint();
     case boolean(bool boolean): return tbool();
+    case string(str string): return tstr();
     case not(AExpr expr): return tbool();
     case product(AExpr expr1, AExpr expr2): return tint();
     case quotient(AExpr expr1, AExpr expr2): return tint();
