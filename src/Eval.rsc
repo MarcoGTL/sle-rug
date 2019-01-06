@@ -49,7 +49,7 @@ VEnv evalOnce(AForm f, Input inp, VEnv venv) {
 VEnv eval(AQuestion q, Input inp, VEnv venv) {
   // evaluate conditions for branching,
   // evaluate inp and computed questions to return updated VEnv
-  return (); 
+  return venv; 
 }
 
 

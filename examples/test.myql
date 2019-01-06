@@ -19,7 +19,7 @@ form taxOfficeExample {
   "Did you sell a house in 2010?"
     hasSoldHouse: boolean
    
-  if (hasSoldHouse) {
+  if (test3) {
     "What was the selling price?"
       sellingPrice: integer
     "Private debts for the sold house:"

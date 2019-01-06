@@ -41,7 +41,8 @@ set[Message] check(AForm f, TEnv tenv, UseDef useDef)
 set[Message] check(AQuestion q, TEnv tenv, UseDef useDef)
   = { error("Question has same name but different type.", q.src) | (q has name), size(tenv[_,q.name,_]) > 1}
   + { warning("Duplicate label encountered.", q.src) | (q has label), t := tenv<label,def>, size(t[q.label]) > 1 }
-  + { error("Declared type does not match expression type.", q.src) | (q is computed), (toType(q.datatype) != typeOf(q.expr,tenv,useDef))}
+  + { error("Declared type does not match expression type.", q.src) | (q is computed), toType(q.datatype) != typeOf(q.expr,tenv,useDef)}
+  + { error("Expression in if statement is not a boolean", q.src) | (q is ifthen || q is ifthenelse), typeOf(q.expr,tenv,useDef != tbool())}
   + ( {} | it +  check(e, tenv, useDef) | (q has expr), /AExpr e <- q);
 
 // Check operand compatibility with operators.
