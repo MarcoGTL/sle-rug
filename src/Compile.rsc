@@ -23,8 +23,23 @@ void compile(AForm f) {
   writeFile(f.src[extension="html"].top, toString(form2html(f)));
 }
 
+HTML5Node question(AQuestion q) {
+  HTML5Node inp;
+  switch(q.datatype) {
+    case tbool(): inp = input(\type("checkbox"));
+    case tint(): inp = input(\type("number"));
+    case tstr(): inp = input(\type("text"));
+    default: inp = input();
+  }
+  HTML5Node questions = li(q.label, br(), q.name, ": ", inp);
+  return questions;
+}
+
 HTML5Node form2html(AForm f) {
-  return html();
+  HTML5Node html 
+    = html(head(title(f.name)), body(h1(f.name),
+        ul([question(q)|AQuestion q <- f.questions, q has name])));
+  return html;
 }
 
 str form2js(AForm f) {
