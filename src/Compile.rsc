@@ -30,7 +30,7 @@ HTML5Node question(AQuestion q) {
     case tbool(): inp = input(\type("checkbox"), name(q.name));
     case tint(): inp = input(\type("number"), name(q.name), placeholder(0));
     case tstr(): inp = input(\type("text"), name(q.name), placeholder(q.name));
-    default: inp = input();
+    default: throw "Unsupported datatype <q.datatype>";
   }
   HTML5Node question = div(hr(), label(q.label), br(), q.name, ": ", inp);
   return question;
@@ -50,23 +50,50 @@ str form2js(AForm f) {
               '    el: \'#vm\',
               '    data: {";
 //Insert non-computed question variables
-
+  for (/AQuestion q <- f.questions, q is single) {
+	code += "\n        "+ q.name + ": ";
+	switch(q.datatype) {
+	  case tint(): code += "0";
+	  case tbool(): code += "false";
+	  case tstr(): code += "\'\'";
+	  default: throw "Unsupported datatype <q.datatype>";
+	}
+  }
   code += "\n    },
   		  '    methods: {";
-//Insert functions for the computed questions	  
+//Insert functions for the computed questions
+  for (/AQuestion q <- f.questions, q is computed) {
+	code += "\n        "+ q.name + ": function() {
+			'            return " + exp2js(q.expr) + ";
+			'        }";
+  }
   code += "\n    }
           '})";;
   return code;
 }
-              
-str template() {
-  str thing = "var vm = new Vue({
-              '    el: \'#vm\',
-              '    data: {
-              '    },
-              '";
-     thing += "    methods: {
-              '    }
-              '})";
-  return thing;
+
+str exp2js(AExpr expr) {
+  println(expr);
+  switch(expr) {
+    case parentheses(AExpr e): return "(" + exp2js(e) + ")";
+    case ref(str name): return "eval(this." + name + ")";
+    case integer(int integer): return integer;
+    case boolean(bool boolean): return boolean;
+    case string(str string): return string;
+    case not(AExpr e): return "!(" + exp2js(e) + ")";
+    case product(AExpr e1, AExpr e2): return exp2js(e1) + " * " + exp2js(e2);
+    case quotient(AExpr e1, AExpr e2): return exp2js(e1) + " / " + exp2js(e2);
+    case plus(AExpr e1, AExpr e2): return exp2js(e1) + " + " + exp2js(e2);
+    case minus(AExpr e1, AExpr e2): return exp2js(e1) + " - " + exp2js(e2);
+    case less(AExpr e1, AExpr e2): return exp2js(e1) + " \< " + exp2js(e2);
+    case lesseq(AExpr e1, AExpr e2): return exp2js(e1) + " \<= " + exp2js(e2);
+    case greater(AExpr e1, AExpr e2): return exp2js(e1) + " \> " + exp2js(e2);
+    case greatereq(AExpr e1, AExpr e2): return exp2js(e1) + " \>= " + exp2js(e2);
+    case equals(AExpr e1, AExpr e2): return exp2js(e1) + " === " + exp2js(e2);
+    case notequals(AExpr e1, AExpr e2): return exp2js(e1) + " != " + exp2js(e2);
+    case and(AExpr e1, AExpr e2): return exp2js(e1) + " && " + exp2js(e2);
+    case or(AExpr e1, AExpr e2): return exp2js(e1) + " || " + exp2js(e2);
+    default: throw "Unknown expression encountered: <expr>";
+  }
+  return "";
 }
