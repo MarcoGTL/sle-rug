@@ -3,6 +3,7 @@ module Compile
 import AST;
 import Resolve;
 import Set;
+import Boolean;
 import IO;
 import lang::html5::DOM; // see standard library
 
@@ -53,9 +54,9 @@ str form2js(AForm f) {
   for (/AQuestion q <- f.questions, q is single) {
 	code += "\n        "+ q.name + ": ";
 	switch(q.datatype) {
-	  case tint(): code += "0";
+	  case tint():  code += "0";
 	  case tbool(): code += "false";
-	  case tstr(): code += "\'\'";
+	  case tstr():  code += "\'\'";
 	  default: throw "Unsupported datatype <q.datatype>";
 	}
   }
@@ -77,8 +78,8 @@ str exp2js(AExpr expr) {
   switch(expr) {
     case parentheses(AExpr e): return "(" + exp2js(e) + ")";
     case ref(str name): return "eval(this." + name + ")";
-    case integer(int integer): return integer;
-    case boolean(bool boolean): return boolean;
+    case integer(int integer): return "<integer>";
+    case boolean(bool boolean): return toString(boolean);
     case string(str string): return string;
     case not(AExpr e): return "!(" + exp2js(e) + ")";
     case product(AExpr e1, AExpr e2): return exp2js(e1) + " * " + exp2js(e2);
