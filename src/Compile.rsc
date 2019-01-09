@@ -25,8 +25,62 @@ void compile(AForm f) {
   writeFile(f.src[extension="html"].top, toString(form2html(f)));
 }
 
-HTML5Node question(AQuestion q) {
-  HTML5Node inp;
+void printtest(HTML5Node tnode) {
+  println(toString(tnode));
+}
+
+HTML5Attr vmodel(value val) = html5attr("v-model", val);
+
+HTML5Node form2html(AForm f) = 
+	html(
+      script(src("https://cdn.jsdelivr.net/npm/vue")),
+	  head(title(f.name)),
+	  body(
+	    h3(f.name),
+	    div(
+	      id("vm"),
+	      form(
+	        div([question(q, "")|AQuestion q <- f.questions]),
+	        input(
+	          \type("submit"), 
+	          \value("Submit")
+	        )
+	      )
+	    ),
+	    script(src("test.js"/*!!!*/))
+	  )
+	);
+    
+
+HTML5Node question(AQuestion q, str condition) {
+  if (q is single) {
+    switch(q.datatype) {
+    	case tbool(): return  p(label(q.label), input(\type("checkbox"), id(q.name), vmodel(q.name)));
+    	case tint(): return  p(label(q.label), input(\type("number"), id(q.name), vmodel(q.name)));
+    	case tstr(): return  p(label(q.label), input(\type("text"), id(q.name), vmodel(q.name)));
+    	default: throw "undefined datatype <q.datatype>";
+    }
+  }
+  if (q is computed ) {
+  	return p(label(q.label), "{{housesTotal()}}"/*!!!*/);
+  }
+  if (q is ifthen) {
+  	return div([question(qe, exp2js(q.expr))|AQuestion qe <- q.questions]);
+  }
+  if (q is ifthen) {
+  	return div([question(qe, exp2js(q.expr))|AQuestion qe <- q.questions]);
+  }
+  
+  return p();
+}
+/*
+
+doctype(html(script(src("https://cdn.jsdelivr.net/npm/vue")),head(title(f.name)), body(h3(f.name), 
+    div(id("vm") , form(div([question(q)|AQuestion q <- f.questions]), input(\type("submit"), \value("Submit")))),
+   script(src("test.js"))
+   )));
+
+HTML5Node inp;
   switch(q.datatype) {
     case tbool(): inp = input(\type("checkbox"), name(q.name));
     case tint(): inp = input(\type("number"), name(q.name), placeholder(0));
@@ -34,16 +88,7 @@ HTML5Node question(AQuestion q) {
     default: throw "Unsupported datatype <q.datatype>";
   }
   HTML5Node question = div(hr(), label(q.label), br(), q.name, ": ", inp);
-  return question;
-}
-
-HTML5Node form2html(AForm f) {
-  HTML5Node html 
-    = html(head(title(f.name)), body(h1(f.name), 
-    	form([question(q)|AQuestion q <- f.questions, q has name]), 
-    		input(\type("submit"), \value("Submit"))));
-  return html;
-}
+  return question; */
 
 str form2js(AForm f) {
   set[str] variables = defs(f)<0>;
@@ -54,9 +99,9 @@ str form2js(AForm f) {
   for (/AQuestion q <- f.questions, q is single) {
 	code += "\n        "+ q.name + ": ";
 	switch(q.datatype) {
-	  case tint():  code += "0";
-	  case tbool(): code += "false";
-	  case tstr():  code += "\'\'";
+	  case tint():  code += "0,";
+	  case tbool(): code += "false,";
+	  case tstr():  code += "\'\',";
 	  default: throw "Unsupported datatype <q.datatype>";
 	}
   }
@@ -66,7 +111,7 @@ str form2js(AForm f) {
   for (/AQuestion q <- f.questions, q is computed) {
 	code += "\n        "+ q.name + ": function() {
 			'            return " + exp2js(q.expr) + ";
-			'        }";
+			'        },";
   }
   code += "\n    }
           '})";;
@@ -74,7 +119,6 @@ str form2js(AForm f) {
 }
 
 str exp2js(AExpr expr) {
-  println(expr);
   switch(expr) {
     case parentheses(AExpr e): return "(" + exp2js(e) + ")";
     case ref(str name): return "eval(this." + name + ")";
