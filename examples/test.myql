@@ -2,26 +2,26 @@ form taxOfficeExample {
   "Did you buy a house in 2010?"
     hasBoughtHouse: boolean
     
-  "Who is the best tekken character?"
-    character: string
+  "What is your favorite food?"
+    food: string
 
   "How many houses have you bought in 2010?"
     houses2010: integer
 
   // akjsdhakjshdkjsa
    
-  if (character == "xiaoyu") {
+  if (food == "lasagne") {
     "How many houses have you bought in 2011?"
       houses2011: integer
     "Total houses bought:"
       housesTotal: integer = houses2010 + houses2011
-	  if (housesTotal > 10) {
-	    "OwO"
-	      OwO: boolean
-	  }
+    if (housesTotal > 10) {
+	  "Are you rich?"
+	    rich: boolean
+	}
   } else {
-    "Your character is trash:"
-      character: string = "trash"
+    "Why is your favorite food not lasagne?"
+      why: string
   }
   if (hasBoughtHouse) {
   	"What was the buying price in 2010?"

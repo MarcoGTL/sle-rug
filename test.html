@@ -1,0 +1,48 @@
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<!DOCTYPE html>
+<html>
+    <head>
+    	<title>taxofficeExample</title>
+    </head>
+    <body>
+	<h3>taxofficeExample</h3>
+        <div id="vm">
+        <form>	
+            <p>
+                <label for="hasBoughtHouse">Did you buy a house in 2010?</label>
+                <input type="checkbox" id="hasBoughtHouse" v-model="hasBoughtHouse">
+            </p>
+            <p>
+                <label for="food">What is your favorite food?</label>
+                <input type="text" id="food" name="food" v-model="food">
+            </p>
+            <p>
+                <label for="houses2010">How many houses have you bought in 2010?</label>
+                <input type="number" id="houses2010" name="houses2010" v-model="houses2010">
+            </p>
+            <p v-if="food === 'lasagne'">
+                <label for="houses2011">How many houses have you bought in 2011?</label>
+                <input type="number" id="houses2011" name="houses2011" v-model="houses2011">
+            </p>
+            <p v-if="food === 'lasagne'">
+                <label>Total houses bought:</label>
+                {{housesTotal()}}
+            </p>
+            <p v-if="food === 'lasagne' && housesTotal() >= 10">
+                <label for="rich">Are you rich?</label>
+                <input type="checkbox" id="rich" v-model="rich">
+            </p>
+            <p v-if="!(food === 'lasagne')">
+                <label>Why is your favorite food not lasagne?</label>
+                <input type="text" id="why" name="why" v-model="why">
+            </p>
+            <p v-if="hasBoughtHouse">
+                <label>What was the buying price in 2010?</label>
+                <input type="number" id="buyingPrice" name="buyingPrice" v-model="buyingPrice">
+            </p>
+            <input type="submit" value="Submit">
+        </form>
+        </div>
+    <script src="test.js"></script>
+    </body>
+</html>

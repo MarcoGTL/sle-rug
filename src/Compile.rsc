@@ -2,6 +2,7 @@ module Compile
 
 import AST;
 import Resolve;
+import Set;
 import IO;
 import lang::html5::DOM; // see standard library
 
@@ -44,5 +45,28 @@ HTML5Node form2html(AForm f) {
 }
 
 str form2js(AForm f) {
-  return "";
+  set[str] variables = defs(f)<0>;
+  str code = "var vm = new Vue({
+              '    el: \'#vm\',
+              '    data: {";
+//Insert non-computed question variables
+
+  code += "\n    },
+  		  '    methods: {";
+//Insert functions for the computed questions	  
+  code += "\n    }
+          '})";;
+  return code;
+}
+              
+str template() {
+  str thing = "var vm = new Vue({
+              '    el: \'#vm\',
+              '    data: {
+              '    },
+              '";
+     thing += "    methods: {
+              '    }
+              '})";
+  return thing;
 }
