@@ -5,7 +5,8 @@ import Resolve;
 import String;
 import Boolean;
 import IO;
-import lang::html5::DOM; // see standard library
+//import lang::html5::DOM; // see standard library
+import DOM;
 
 /*
  * Implement a compiler for QL to HTML and Javascript
