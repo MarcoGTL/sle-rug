@@ -30,6 +30,7 @@ void printtest(HTML5Node tnode) {
 }
 
 HTML5Attr vmodel(value val) = html5attr("v-model", val);
+HTML5Attr vif(value val) = html5attr("v-if", val);
 
 HTML5Node form2html(AForm f) = 
 	html(
@@ -40,7 +41,7 @@ HTML5Node form2html(AForm f) =
 	    div(
 	      id("vm"),
 	      form(
-	        div([question(q, "")|AQuestion q <- f.questions]),
+	        div([question(f, q, "true")|AQuestion q <- f.questions]),
 	        input(
 	          \type("submit"), 
 	          \value("Submit")
@@ -51,24 +52,32 @@ HTML5Node form2html(AForm f) =
 	  )
 	);
     
+HTML5Attr cond(str condition) {
+	if (condition == "") {
+		return vif(true);
+	} else {
+		return vif(condition);
+	}
+}
 
-HTML5Node question(AQuestion q, str condition) {
+HTML5Node question(AForm f, AQuestion q, str condition) {
   if (q is single) {
     switch(q.datatype) {
-    	case tbool(): return  p(label(q.label), input(\type("checkbox"), id(q.name), vmodel(q.name)));
-    	case tint(): return  p(label(q.label), input(\type("number"), id(q.name), vmodel(q.name)));
-    	case tstr(): return  p(label(q.label), input(\type("text"), id(q.name), vmodel(q.name)));
+    	case tbool(): return  p(cond(condition), label(q.label), input(\type("checkbox"), id(q.name), vmodel(q.name)));
+    	case tint(): return  p(cond(condition), label(q.label), input(\type("number"), id(q.name), vmodel(q.name)));
+    	case tstr(): return  p(cond(condition), label(q.label), input(\type("text"), id(q.name), vmodel(q.name)));
     	default: throw "undefined datatype <q.datatype>";
     }
   }
   if (q is computed ) {
-  	return p(label(q.label), "{{housesTotal()}}"/*!!!*/);
+  	return p(cond(condition), label(q.label), "{{housesTotal()}}"/*!!!*/);
   }
   if (q is ifthen) {
-  	return div([question(qe, exp2js(q.expr))|AQuestion qe <- q.questions]);
+  	return div([question(f, qe, condition + " && " + exp2js(f, q.condition, true))|AQuestion qe <- q.questions]);
   }
-  if (q is ifthen) {
-  	return div([question(qe, exp2js(q.expr))|AQuestion qe <- q.questions]);
+  if (q is ifthenelse) {
+  	return div([question(f, qe, condition + " && " + exp2js(f, q.condition, true))|AQuestion qe <- q.ifquestions]
+  	          +[question(f, qe, condition + " && " + "!(" + exp2js(f, q.condition, true) + ")")|AQuestion qe <- q.elsequestions]);
   }
   
   return p();
@@ -110,34 +119,46 @@ str form2js(AForm f) {
 //Insert functions for the computed questions
   for (/AQuestion q <- f.questions, q is computed) {
 	code += "\n        "+ q.name + ": function() {
-			'            return " + exp2js(q.expr) + ";
+			'            return " + exp2js(f, q.expr, false) + ";
 			'        },";
   }
   code += "\n    }
-          '})";;
+          '})";
   return code;
 }
 
-str exp2js(AExpr expr) {
+bool isComputed(str variable, AForm f) {
+  for (/AQuestion q <- f.questions, q is computed && q.name == variable) {
+    return true;
+  }
+  return false;
+}
+
+str exp2js(AForm f, AExpr expr, bool condition) {
   switch(expr) {
-    case parentheses(AExpr e): return "(" + exp2js(e) + ")";
-    case ref(str name): return "eval(this." + name + ")";
+    case parentheses(AExpr e): return "(" + exp2js(f, e, condition) + ")";
+    case ref(str name): 
+      if (condition) {
+        return isComputed(name, f) ? name+"()" : name;
+        } else {
+        return  isComputed(name, f) ? "eval(this." + name + "())" : "eval(this." + name + ")";
+      }
     case integer(int integer): return "<integer>";
     case boolean(bool boolean): return toString(boolean);
-    case string(str string): return string;
-    case not(AExpr e): return "!(" + exp2js(e) + ")";
-    case product(AExpr e1, AExpr e2): return exp2js(e1) + " * " + exp2js(e2);
-    case quotient(AExpr e1, AExpr e2): return exp2js(e1) + " / " + exp2js(e2);
-    case plus(AExpr e1, AExpr e2): return exp2js(e1) + " + " + exp2js(e2);
-    case minus(AExpr e1, AExpr e2): return exp2js(e1) + " - " + exp2js(e2);
-    case less(AExpr e1, AExpr e2): return exp2js(e1) + " \< " + exp2js(e2);
-    case lesseq(AExpr e1, AExpr e2): return exp2js(e1) + " \<= " + exp2js(e2);
-    case greater(AExpr e1, AExpr e2): return exp2js(e1) + " \> " + exp2js(e2);
-    case greatereq(AExpr e1, AExpr e2): return exp2js(e1) + " \>= " + exp2js(e2);
-    case equals(AExpr e1, AExpr e2): return exp2js(e1) + " === " + exp2js(e2);
-    case notequals(AExpr e1, AExpr e2): return exp2js(e1) + " != " + exp2js(e2);
-    case and(AExpr e1, AExpr e2): return exp2js(e1) + " && " + exp2js(e2);
-    case or(AExpr e1, AExpr e2): return exp2js(e1) + " || " + exp2js(e2);
+    case string(str name): return name;
+    case not(AExpr e): return "!(" + exp2js(f, e, condition) + ")";
+    case product(AExpr e1, AExpr e2): return exp2js(f, e1, condition) + " * " + exp2js(f, e2, condition);
+    case quotient(AExpr e1, AExpr e2): return exp2js(f, e1, condition) + " / " + exp2js(f, e2, condition);
+    case plus(AExpr e1, AExpr e2): return exp2js(f, e1, condition) + " + " + exp2js(f, e2, condition);
+    case minus(AExpr e1, AExpr e2): return exp2js(f, e1, condition) + " - " + exp2js(f, e2, condition);
+    case less(AExpr e1, AExpr e2): return exp2js(f, e1, condition) + " \< " + exp2js(f, e2, condition);
+    case lesseq(AExpr e1, AExpr e2): return exp2js(f, e1, condition) + " \<= " + exp2js(f, e2, condition);
+    case greater(AExpr e1, AExpr e2): return exp2js(f, e1, condition) + " \> " + exp2js(f, e2, condition);
+    case greatereq(AExpr e1, AExpr e2): return exp2js(f, e1, condition) + " \>= " + exp2js(f, e2, condition);
+    case equals(AExpr e1, AExpr e2): return exp2js(f, e1, condition) + " === " + exp2js(f, e2, condition);
+    case notequals(AExpr e1, AExpr e2): return exp2js(f, e1, condition) + " != " + exp2js(f, e2, condition);
+    case and(AExpr e1, AExpr e2): return exp2js(f, e1, condition) + " && " + exp2js(f, e2, condition);
+    case or(AExpr e1, AExpr e2): return exp2js(f, e1, condition) + " || " + exp2js(f, e2, condition);
     default: throw "Unknown expression encountered: <expr>";
   }
   return "";

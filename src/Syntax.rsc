@@ -58,7 +58,8 @@ syntax Type
   = "boolean" | "integer" | "string";  
 
 // Or maybe something like (![\"] | "\\"<<"\"")* which accepts everything except another " unless it is \"
-lexical Str = "\""[A-Z a-z 0-9 \ !?/@#$%^&*()_+-=:;\<\>,.\\|]*"\"" ; 
+lexical Str = "\'"[A-Z a-z 0-9 \ !?/@#$%^&*()_+-=:;\<\>,.\\|]*"\'" 
+             |"\""[A-Z a-z 0-9 \ !?/@#$%^&*()_+-=:;\<\>,.\\|]*"\""    ; 
 
 lexical Int = [0-9]+;
 

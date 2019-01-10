@@ -15,8 +15,8 @@ data AQuestion(loc src = |tmp:///|)
   = single(str label, str name, AType datatype)
   | computed(str label, str name, AType datatype, AExpr expr)
   | block(list[AQuestion] questions)
-  | ifthen(AExpr expr, list[AQuestion] questions)
-  |	ifthenelse(AExpr expr, list[AQuestion] questions, list[AQuestion] questions)
+  | ifthen(AExpr condition, list[AQuestion] questions)
+  |	ifthenelse(AExpr condition, list[AQuestion] ifquestions, list[AQuestion] elsequestions)
   ; 
 
 data AExpr(loc src = |tmp:///|)
