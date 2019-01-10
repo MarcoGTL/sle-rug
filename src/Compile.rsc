@@ -2,7 +2,7 @@ module Compile
 
 import AST;
 import Resolve;
-import Set;
+import String;
 import Boolean;
 import IO;
 import lang::html5::DOM; // see standard library
@@ -48,7 +48,7 @@ HTML5Node form2html(AForm f) =
 	        )
 	      )
 	    ),
-	    script(src("test.js"/*!!!*/))
+	    script(src(f.src.file[..-4]+"js"))
 	  )
 	);
     
@@ -63,14 +63,14 @@ HTML5Attr cond(str condition) {
 HTML5Node question(AForm f, AQuestion q, str condition) {
   if (q is single) {
     switch(q.datatype) {
-    	case tbool(): return  p(cond(condition), label(q.label), input(\type("checkbox"), id(q.name), vmodel(q.name)));
-    	case tint(): return  p(cond(condition), label(q.label), input(\type("number"), id(q.name), vmodel(q.name)));
-    	case tstr(): return  p(cond(condition), label(q.label), input(\type("text"), id(q.name), vmodel(q.name)));
+    	case tbool(): return  p(cond(condition), HTML5Node::label(q.label), input(\type("checkbox"), id(q.name), vmodel(q.name)));
+    	case tint(): return  p(cond(condition), HTML5Node::label(q.label), input(\type("number"), id(q.name), vmodel(q.name)));
+    	case tstr(): return  p(cond(condition), HTML5Node::label(q.label), input(\type("text"), id(q.name), vmodel(q.name)));
     	default: throw "undefined datatype <q.datatype>";
     }
   }
   if (q is computed ) {
-  	return p(cond(condition), label(q.label), "{{housesTotal()}}"/*!!!*/);
+  	return p(cond(condition), HTML5Node::label(q.label), "{{<q.name>()}}");
   }
   if (q is ifthen) {
   	return div([question(f, qe, condition + " && " + exp2js(f, q.condition, true))|AQuestion qe <- q.questions]);
@@ -79,25 +79,8 @@ HTML5Node question(AForm f, AQuestion q, str condition) {
   	return div([question(f, qe, condition + " && " + exp2js(f, q.condition, true))|AQuestion qe <- q.ifquestions]
   	          +[question(f, qe, condition + " && " + "!(" + exp2js(f, q.condition, true) + ")")|AQuestion qe <- q.elsequestions]);
   }
-  
   return p();
 }
-/*
-
-doctype(html(script(src("https://cdn.jsdelivr.net/npm/vue")),head(title(f.name)), body(h3(f.name), 
-    div(id("vm") , form(div([question(q)|AQuestion q <- f.questions]), input(\type("submit"), \value("Submit")))),
-   script(src("test.js"))
-   )));
-
-HTML5Node inp;
-  switch(q.datatype) {
-    case tbool(): inp = input(\type("checkbox"), name(q.name));
-    case tint(): inp = input(\type("number"), name(q.name), placeholder(0));
-    case tstr(): inp = input(\type("text"), name(q.name), placeholder(q.name));
-    default: throw "Unsupported datatype <q.datatype>";
-  }
-  HTML5Node question = div(hr(), label(q.label), br(), q.name, ": ", inp);
-  return question; */
 
 str form2js(AForm f) {
   set[str] variables = defs(f)<0>;
@@ -145,7 +128,7 @@ str exp2js(AForm f, AExpr expr, bool condition) {
       }
     case integer(int integer): return "<integer>";
     case boolean(bool boolean): return toString(boolean);
-    case string(str name): return name;
+    case string(str name): return "\'" + name + "\'";
     case not(AExpr e): return "!(" + exp2js(f, e, condition) + ")";
     case product(AExpr e1, AExpr e2): return exp2js(f, e1, condition) + " * " + exp2js(f, e2, condition);
     case quotient(AExpr e1, AExpr e2): return exp2js(f, e1, condition) + " / " + exp2js(f, e2, condition);

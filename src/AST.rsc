@@ -9,7 +9,7 @@ module AST
 
 data AForm(loc src = |tmp:///|)
   = form(str name, list[AQuestion] questions)
-  ; 
+  ;
 
 data AQuestion(loc src = |tmp:///|)
   = single(str label, str name, AType datatype)
