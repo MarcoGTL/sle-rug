@@ -12,7 +12,13 @@ import Set;
  
 /* Normalization:
  *  wrt to the semantics of QL the following
- *     q0: "" int; if (a) { if (b) { q1: "" int; } q2: "" int; }
+ *     q0: "" int; 
+ *     if (a) { 
+ *        if (b) { 
+ *          q1: "" int; 
+ *        } 
+ *        q2: "" int; 
+ *      }
  *
  *  is equivalent to
  *     if (true) q0: "" int;
@@ -54,18 +60,8 @@ AQuestion flatten(AQuestion q, AExpr cond) {
  * Write a refactoring transformation that consistently renames all occurrences of the same name.
  * Use the results of name resolution to find the equivalence class of a name.
  *
- * Bonus: do it on concrete syntax trees.
  */
  
- AForm rename(AForm f, loc useOrDef, str newName, UseDef useDef) {
-   for (/AQuestion q := f, q has name, q.src == useOrDef) {
-     println(q);
-     q.name = newName;
-     println(q);
-   }
+ start[Form] rename(start[Form] f, loc useOrDef, str newName, UseDef useDef) {
    return f; 
- }
- 
- 
- 
-
+ } 
