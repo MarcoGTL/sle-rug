@@ -19,7 +19,13 @@ import Boolean;
  */
 
 // remove layout before and after form
-AForm cst2ast(start[Form] sf) = cst2ast(sf.top);
+AForm cst2ast(start[Form] sf) {
+  Form f = sf.top; // remove layout before and after form
+  switch (f) {
+    case (Form)`form <Id x> { <Question* qs> }`: return form("", [], src=f@\loc);
+    default: throw "unhandled expression: <f>";
+  }
+}
 
 AForm cst2ast(f:(Form)`form <Id x> { <Question* qs> }`)
   = form("<x>", [cst2ast(q) | Question q <- qs], src = f@\loc);
