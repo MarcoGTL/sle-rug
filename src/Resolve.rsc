@@ -6,7 +6,6 @@ import AST;
  * Name resolution for QL
  */ 
 
-
 // modeling declaring occurrences of names
 alias Def = rel[str name, loc def];
 
@@ -18,22 +17,6 @@ alias UseDef = rel[loc use, loc def];
 
 UseDef resolve(AForm f) = uses(f) o defs(f);
 
-Use uses(AForm f) {
-  Use use = {};  
-  for (/AExpr e := f) {
-  	if (e has name) {
-  	  use[e.src] = e.name;
-  	}
-  }  
-  return use; 
-}
+Use uses(AForm f) = {<e.src, e.name>| /AExpr e <- f, e has name};
 
-Def defs(AForm f) {
-  Def def = {};  
-  for (/AQuestion q := f) {
-  	if (q has name) {
-  	  def[q.name] = q.src;
-  	}
-  } 
-  return def;
-}
+Def defs(AForm f) = {<q.name, q.src> | /AQuestion q <- f, q has name};

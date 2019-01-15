@@ -3,6 +3,7 @@ module Transform
 import Resolve;
 import AST;
 import IO;
+import Set;
 
 /* 
  * Transforming QL forms
@@ -57,8 +58,13 @@ AQuestion flatten(AQuestion q, AExpr cond) {
  */
  
  AForm rename(AForm f, loc useOrDef, str newName, UseDef useDef) {
+   for (/AQuestion q := f, q has name, q.src == useOrDef) {
+     println(q);
+     q.name = newName;
+     println(q);
+   }
    return f; 
- } 
+ }
  
  
  
