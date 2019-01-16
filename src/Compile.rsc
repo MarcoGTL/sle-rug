@@ -84,14 +84,15 @@ HTML5Node question(AForm f, AQuestion q, str condition) {
 }
 
 str form2js(AForm f) {
-  set[str] variables = defs(f)<0>;
   str code = "var vm = new Vue({
               '    el: \'#vm\',
               '    data: {";
 //Insert non-computed question variables
-  for (/AQuestion q <- f.questions, q is single) {
+  set[str] variables = {};
+  for (/AQuestion q <- f.questions, q is single, q.name notin variables) {
+	variables += q.name;
 	code += "\n        "+ q.name + ": ";
-	switch(q.datatype) {
+    switch(q.datatype) {
 	  case tint():  code += "0,";
 	  case tbool(): code += "false,";
 	  case tstr():  code += "\'\',";
@@ -101,9 +102,10 @@ str form2js(AForm f) {
   code += "\n    },
   		  '    methods: {";
 //Insert functions for the computed questions
-  for (/AQuestion q <- f.questions, q is computed) {
+  for (/AQuestion q <- f.questions, q is computed, q.name notin variables) {
+    variables += q.name;
 	code += "\n        "+ q.name + ": function() {
-			'            return " + exp2js(f, q.expr, false) + ";
+		    '            return " + exp2js(f, q.expr, false) + ";
 			'        },";
   }
   code += "\n    }

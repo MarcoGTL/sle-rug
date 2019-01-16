@@ -1,5 +1,6 @@
 module Transform
 
+extend lang::std::Id;
 import Resolve;
 import AST;
 import IO;
@@ -63,5 +64,13 @@ AQuestion flatten(AQuestion q, AExpr cond) {
  */
  
  start[Form] rename(start[Form] f, loc useOrDef, str newName, UseDef useDef) {
-   return f; 
+   set[loc] occurrences = {l1 | <loc l1, loc l2> <- useDef, l2 == useOrDef} 
+                        + {l2 | <loc l1, loc l2> <- useDef, l1 == useOrDef} 
+                        + useOrDef;
+   println(occurrences);
+   return visit(f) {
+     case Id x : 
+     if (x@\loc in occurrences) println((x@\loc));
+     //case Id x => [Id]newName when (x@\loc) in occurrences
+   }
  }

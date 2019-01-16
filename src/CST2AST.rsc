@@ -29,8 +29,8 @@ AForm cst2ast(start[Form] sf) {
 
 AQuestion cst2ast(qe:Question q) {
   switch (q) {
-  	case (Question)`<Str label> <Id variable>:<Type t>`: return single("<label>"[1..-1], "<variable>", cst2ast(t), src=qe@\loc);
-	case (Question)`<Str label> <Id variable>: <Type t> = <Expr e>`: return computed("<label>"[1..-1], "<variable>", cst2ast(t), cst2ast(e), src=qe@\loc);
+  	case (Question)`<Str label> <Id name>:<Type t>`: return single("<label>"[1..-1], "<name>", cst2ast(t), src=qe@\loc);
+	case (Question)`<Str label> <Id name>: <Type t> = <Expr e>`: return computed("<label>"[1..-1], "<name>", cst2ast(t), cst2ast(e), src=qe@\loc);
 	case (Question)`{<Question* qs>}`: return block([cst2ast(qu) | Question qu <- qs], src=qe@\loc); 
 	case (Question)`if (<Expr e>) {<Question* qs>}`: return ifthen(cst2ast(e), [cst2ast(qu) | Question qu <- qs], src=qe@\loc);
 	case (Question)`if (<Expr e>) {<Question* qs1>} else {<Question* qs2>}`: return ifthenelse(cst2ast(e), [cst2ast(q1) | Question q1 <- qs1], [cst2ast(q2) | Question q2 <- qs2], src=qe@\loc);
