@@ -69,8 +69,6 @@ AQuestion flatten(AQuestion q, AExpr cond) {
                         + useOrDef;
    println(occurrences);
    return visit(f) {
-     case Id x : 
-     if (x@\loc in occurrences) println((x@\loc));
-     //case Id x => [Id]newName when (x@\loc) in occurrences
+     case Id x => [Id]newName when (x@\loc) in occurrences
    }
  }
