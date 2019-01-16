@@ -67,7 +67,6 @@ AQuestion flatten(AQuestion q, AExpr cond) {
    set[loc] occurrences = {l1 | <loc l1, loc l2> <- useDef, l2 == useOrDef} 
                         + {l2 | <loc l1, loc l2> <- useDef, l1 == useOrDef} 
                         + useOrDef;
-   println(occurrences);
    return visit(f) {
      case Id x => [Id]newName when (x@\loc) in occurrences
    }
