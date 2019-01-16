@@ -19,15 +19,15 @@ alias TEnv = rel[loc def, str name, str label, Type \type];
 // To avoid recursively traversing the form, use the `visit` construct
 // or deep match (e.g., `for (/question(...) := f) {...}` ) 
 TEnv collect(AForm f) {
-  TEnv tenv = { <q.src, q.name, q.label, toType(q.datatype)> | /AQuestion q <- f.questions, (q has name)};
+  TEnv tenv = { <q.nsrc, q.name, q.label, toType(q.datatype)> | /AQuestion q <- f.questions, (q has name)};
   return tenv;  
 }
 
-Type toType(AType t) {
-  switch(t) {
-    case tint(): return tint();
-    case tbool(): return tbool();
-  	case tstr(): return tstr();
+Type toType(AType at) {
+  switch(at) {
+    case atint(): return tint();
+    case atbool(): return tbool();
+  	case atstr(): return tstr();
   	default: return tunknown();
   }
 }
@@ -39,10 +39,10 @@ set[Message] check(AForm f, TEnv tenv, UseDef useDef)
 // - duplicate labels should trigger a warning 
 // - the declared type computed questions should match the type of the expression.
 set[Message] check(AQuestion q, TEnv tenv, UseDef useDef)
-  = { error("Question has same name but different type.", q.src) | (q has name), size(tenv[_,q.name,_]) > 1}
-  + { warning("Duplicate label encountered.", q.src) | (q has label), t := tenv<label,def>, size(t[q.label]) > 1 }
-  + { error("Declared type does not match expression type.", q.src) | (q is computed), toType(q.datatype) != typeOf(q.expr,tenv,useDef)}
-  + { error("Expression in if statement is not a boolean", q.condition.src) | (q is ifthen || q is ifthenelse), typeOf(q.condition,tenv,useDef) != tbool()}
+  = { error("Question has same name but different type.", q.nsrc) | (q has name), size(tenv[_,q.name,_]) > 1}
+  + { warning("Duplicate label encountered.", q.lsrc) | (q has label), t := tenv<label,def>, size(t[q.label]) > 1 }
+  + { error("Declared type is of type <toType(q.datatype)> but expression is <typeOf(q.expr,tenv,useDef)>", q.tsrc) | (q is computed), toType(q.datatype) != typeOf(q.expr,tenv,useDef)}
+  + { error("Expected a boolean but expression is of type <typeOf(q.condition,tenv,useDef)>", q.condition.src) | (q is ifthen || q is ifthenelse), typeOf(q.condition,tenv,useDef) != tbool()}
   + ( {} | it +  check(e, tenv, useDef) | (q has expr), /AExpr e <- q);
 
 // Check operand compatibility with operators.

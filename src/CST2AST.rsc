@@ -29,8 +29,8 @@ AForm cst2ast(start[Form] sf) {
 
 AQuestion cst2ast(qe:Question q) {
   switch (q) {
-  	case (Question)`<Str label> <Id name>:<Type t>`: return single("<label>"[1..-1], "<name>", cst2ast(t), src=name@\loc);
-	case (Question)`<Str label> <Id name>: <Type t> = <Expr e>`: return computed("<label>"[1..-1], "<name>", cst2ast(t), cst2ast(e), src=name@\loc);
+  	case (Question)`<Str label> <Id name>:<Type t>`: return single("<label>"[1..-1], "<name>", cst2ast(t), src=qe@\loc, nsrc=name@\loc, lsrc=label@\loc, tsrc=t@\loc);
+	case (Question)`<Str label> <Id name>: <Type t> = <Expr e>`: return computed("<label>"[1..-1], "<name>", cst2ast(t), cst2ast(e), src=qe@\loc, nsrc=name@\loc, lsrc=label@\loc, tsrc=t@\loc);
 	case (Question)`{<Question* qs>}`: return block([cst2ast(qu) | Question qu <- qs], src=qe@\loc); 
 	case (Question)`if (<Expr e>) {<Question* qs>}`: return ifthen(cst2ast(e), [cst2ast(qu) | Question qu <- qs], src=qe@\loc);
 	case (Question)`if (<Expr e>) {<Question* qs1>} else {<Question* qs2>}`: return ifthenelse(cst2ast(e), [cst2ast(q1) | Question q1 <- qs1], [cst2ast(q2) | Question q2 <- qs2], src=qe@\loc);
@@ -64,9 +64,9 @@ AExpr cst2ast(ex:Expr e) {
 
 AType cst2ast(ty:Type t) {
   switch(t) {
-  	case (Type)`integer`: return tint();
-  	case (Type)`boolean`: return tbool();
-  	case (Type)`string`: return tstr();
-  	default: return tunknown();
+  	case (Type)`integer`: return atint();
+  	case (Type)`boolean`: return atbool();
+  	case (Type)`string`: return atstr();
+  	default: return atunknown();
   }
 }

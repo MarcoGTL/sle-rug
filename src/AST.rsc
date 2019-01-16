@@ -11,7 +11,7 @@ data AForm(loc src = |tmp:///|)
   = form(str name, list[AQuestion] questions)
   ;
 
-data AQuestion(loc src = |tmp:///|)
+data AQuestion(loc src = |tmp:///|, loc nsrc = |tmp:///|, loc lsrc = |tmp:///|, loc tsrc = |tmp:///|)
   = single(str label, str name, AType datatype)
   | computed(str label, str name, AType datatype, AExpr expr)
   | block(list[AQuestion] questions)
@@ -41,8 +41,8 @@ data AExpr(loc src = |tmp:///|)
   ;
 
 data AType(loc src = |tmp:///|)
-  = tint()
-  | tbool()
-  | tstr()
-  | tunknown()
+  = atint()
+  | atbool()
+  | atstr()
+  | atunknown()
   ;

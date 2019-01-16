@@ -12,9 +12,9 @@ form taxOfficeExample {
    
   if (food == "lasagne") {
     "How many houses have you bought in 2011?"
-      houses2010: integer
+      houses2011: integer
     "Total houses bought:"
-      housesTotal: integer = houses2010 + houses2010
+      housesTotal: integer = houses2010 + houses2011
     if (housesTotal > 10) {
 	  "Are you rich?"
 	    rich: boolean
