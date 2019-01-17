@@ -14,7 +14,7 @@ form taxOfficeExample {
     "How many houses have you bought in 2011?"
       houses2011: integer
     "Total houses bought:"
-      housesTotal: integer = houses2011
+      housesTotal: integer = houses2011 + houses2010
     if (housesTotal > 10) {
 	  "Are you rich?"
 	    rich: boolean
