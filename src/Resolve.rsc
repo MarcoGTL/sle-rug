@@ -17,6 +17,6 @@ alias UseDef = rel[loc use, loc def];
 
 UseDef resolve(AForm f) = uses(f) o defs(f);
 
-Use uses(AForm f) = {<e.src, e.name>| /AExpr e <- f, e has name};
+Use uses(AForm f) = {<e.src, x>| /e:ref(str x) <- f};
 
 Def defs(AForm f) = {<q.name, q.nsrc> | /AQuestion q <- f, q has name};

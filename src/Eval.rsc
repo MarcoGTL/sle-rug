@@ -2,6 +2,7 @@ module Eval
 
 import AST;
 import Resolve;
+import IO;
 
 /*
  * Implement big-step semantics for QL
@@ -27,9 +28,9 @@ data Input
 // produce an environment which for each question has a default value
 // (e.g. 0 for int, "" for str etc.)
 VEnv initialEnv(AForm f) {
- VEnv venv = ( q.name : vint(0)  | /AQuestion q <- f.questions, (q has datatype), (q.datatype ==  tint()));
- venv += ( q.name : vbool(false)  | /AQuestion q <- f.questions, (q has datatype), (q.datatype ==  tbool()));
- venv += ( q.name : vstr("")  | /AQuestion q <- f.questions, (q has datatype), (q.datatype ==  tstr()));
+ VEnv venv = ( q.name : vint(0)  | /AQuestion q <- f.questions, (q has datatype), (q.datatype ==  atint()));
+ venv += ( q.name : vbool(false)  | /AQuestion q <- f.questions, (q has datatype), (q.datatype ==  atbool()));
+ venv += ( q.name : vstr("")  | /AQuestion q <- f.questions, (q has datatype), (q.datatype ==  atstr()));
   return venv;
 }
 
@@ -43,7 +44,7 @@ VEnv eval(AForm f, Input inp, VEnv venv) {
 }
 
 VEnv evalOnce(AForm f, Input inp, VEnv venv) {
-  for (AQuestion q <- f.questions) {
+  for (/AQuestion q <- f.questions) {
     venv += eval(q, inp, venv);
   }
   return venv;
@@ -51,9 +52,16 @@ VEnv evalOnce(AForm f, Input inp, VEnv venv) {
 
 VEnv eval(AQuestion q, Input inp, VEnv venv) {
   // evaluate conditions for branching 
-  if (q is ifthen || q is ifthenelse) {
-    if (eval(q.expr, venv) == vbool(true)) {
+  if (q is ifthen) {
+    if (eval(q.condition, venv) == vbool(true)) {
       for (AQuestion qe <- q.questions) {
+        venv += eval(qe, inp, venv);
+      }
+    }
+  }
+  if (q is ifthenelse) {
+    if (eval(q.condition, venv) == vbool(true)) {
+      for (AQuestion qe <- q.elsequestions + q.ifquestions) {
         venv += eval(qe, inp, venv);
       }
     }
@@ -70,6 +78,7 @@ VEnv eval(AQuestion q, Input inp, VEnv venv) {
 
 Value eval(AExpr e, VEnv venv) {
   switch (e) {
+    case parentheses(AExpr expr): return eval(expr, venv);
     case ref(str x): return venv[x];
     case integer(int x): return vint(x);
     case boolean(bool boolean): return vbool(boolean);

@@ -41,7 +41,7 @@ set[Message] check(AForm f, TEnv tenv, UseDef useDef)
 set[Message] check(AQuestion q, TEnv tenv, UseDef useDef)
   = { error("Question has same name but different type.", q.nsrc) | (q has name), size(tenv[_,q.name,_]) > 1}
   + { warning("Duplicate label encountered.", q.lsrc) | (q has label), t := tenv<label,def>, size(t[q.label]) > 1 }
-  + { error("Declared type is of type <toType(q.datatype)> but expression is <typeOf(q.expr,tenv,useDef)>", q.tsrc) | (q is computed), toType(q.datatype) != typeOf(q.expr,tenv,useDef)}
+  + { error("Declared type is <toType(q.datatype)> but expression is of type <typeOf(q.expr,tenv,useDef)>", q.tsrc) | (q is computed), toType(q.datatype) != typeOf(q.expr,tenv,useDef)}
   + { error("Expected a boolean but expression is of type <typeOf(q.condition,tenv,useDef)>", q.condition.src) | (q is ifthen || q is ifthenelse), typeOf(q.condition,tenv,useDef) != tbool()}
   + ( {} | it +  check(e, tenv, useDef) | (q has expr), /AExpr e <- q);
 
@@ -95,6 +95,7 @@ set[Message] check(AExpr e, TEnv tenv, UseDef useDef) {
 
 Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
   switch (e) {
+    case parentheses(AExpr expr): return typeOf(expr, tenv, useDef);
     case ref(str x, src = loc u):  
       if (<u, loc d> <- useDef, <d, x, _, Type t> <- tenv) {
         return t;

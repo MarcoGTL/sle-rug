@@ -64,9 +64,9 @@ HTML5Attr cond(str condition) {
 HTML5Node question(AForm f, AQuestion q, str condition) {
   if (q is single) {
     switch(q.datatype) {
-    	case tbool(): return  p(cond(condition), HTML5Node::label(q.label), input(\type("checkbox"), id(q.name), vmodel(q.name)));
-    	case tint(): return  p(cond(condition), HTML5Node::label(q.label), input(\type("number"), id(q.name), vmodel(q.name)));
-    	case tstr(): return  p(cond(condition), HTML5Node::label(q.label), input(\type("text"), id(q.name), vmodel(q.name)));
+    	case atbool(): return  p(cond(condition), HTML5Node::label(q.label), input(\type("checkbox"), id(q.name), vmodel(q.name)));
+    	case atint(): return  p(cond(condition), HTML5Node::label(q.label), input(\type("number"), id(q.name), vmodel(q.name)));
+    	case atstr(): return  p(cond(condition), HTML5Node::label(q.label), input(\type("text"), id(q.name), vmodel(q.name)));
     	default: throw "undefined datatype <q.datatype>";
     }
   }
@@ -93,9 +93,9 @@ str form2js(AForm f) {
 	variables += q.name;
 	code += "\n        "+ q.name + ": ";
     switch(q.datatype) {
-	  case tint():  code += "0,";
-	  case tbool(): code += "false,";
-	  case tstr():  code += "\'\',";
+	  case atint():  code += "0,";
+	  case atbool(): code += "false,";
+	  case atstr():  code += "\'\',";
 	  default: throw "Unsupported datatype <q.datatype>";
 	}
   }

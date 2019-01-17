@@ -11,9 +11,9 @@ data AForm(loc src = |tmp:///|)
   = form(str name, list[AQuestion] questions)
   ;
 
-data AQuestion(loc src = |tmp:///|, loc nsrc = |tmp:///|, loc lsrc = |tmp:///|, loc tsrc = |tmp:///|)
-  = single(str label, str name, AType datatype)
-  | computed(str label, str name, AType datatype, AExpr expr)
+data AQuestion(loc src = |tmp:///| )
+  = single(str label, str name, AType datatype, loc nsrc = |tmp:///|, loc lsrc = |tmp:///|, loc tsrc = |tmp:///|)
+  | computed(str label, str name, AType datatype, AExpr expr, loc nsrc = |tmp:///|, loc lsrc = |tmp:///|, loc tsrc = |tmp:///|)
   | block(list[AQuestion] questions)
   | ifthen(AExpr condition, list[AQuestion] questions)
   |	ifthenelse(AExpr condition, list[AQuestion] ifquestions, list[AQuestion] elsequestions)
